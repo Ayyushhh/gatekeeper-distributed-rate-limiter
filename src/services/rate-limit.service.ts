@@ -1,29 +1,50 @@
-import {  evaluteTokenBucket } from "../algorithms/token-bucket";
+import { evaluateTokenBucket } from "../algorithms/token-bucket";
+import { DatabaseClient, prisma } from "../lib/database";
 import { bucketRepository } from "../repositories/bucket.repository";
 import { configRepository } from "../repositories/config.repository";
 
 export class RateLimitService {
     async check(clientKey: string) {
-        const config = await configRepository.findByClientKey(clientKey);
+        return prisma.$transaction(async (tx: DatabaseClient) => {
 
-        if (!config) {
-            throw new Error("Client configuration not found.");
-        }
+            const config =
+                await configRepository.findByClientKey(
+                    tx,
+                    clientKey,
+                );
 
-        let bucket = await bucketRepository.findByClientKey(clientKey);
-
-        if(!bucket){
-            bucket = {
-                tokens: config.capacity!,
-                lastRefillAt: Date.now(),
-            };
-        }
-
-        const result = evaluteTokenBucket(config,  bucket);
-
-        await bucketRepository.save(clientKey, result.state);
-
-        return result;
+            if (!config) {
+                throw new Error("Client configuration not found.");
+            }
+        
+            let bucket =
+                await bucketRepository.findByClientKeyForUpdate(
+                    tx,
+                    clientKey,
+                );
+        
+            if (!bucket) {
+                bucket = {
+                    tokens: config.capacity!,
+                    lastRefillAt: Date.now(),
+                };
+            }
+        
+            const result =
+                evaluateTokenBucket(
+                    config,
+                    bucket,
+                );
+        
+            await bucketRepository.save(
+                tx,
+                clientKey,
+                result.state,
+            );
+        
+            return result;
+        
+        });
     }
 }
 

@@ -15,7 +15,7 @@ export interface BucketResult {
     state: BucketState;
 }
 
-export function evaluteTokenBucket(
+export function evaluateTokenBucket(
     config: BucketConfig,
     state: BucketState,
     now: number = Date.now(),

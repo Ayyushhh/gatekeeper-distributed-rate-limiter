@@ -1,6 +1,6 @@
 import { ClientConfig, RateLimitAlgorithm } from "../models/client-config";
 import { configRepository } from "../repositories/config.repository";
-import { configStore } from "../storage/config-store";
+import { DatabaseClient, prisma } from "../lib/database";
 
 export class AdminService {
     async createConfigorUpdateConfig(config: ClientConfig): Promise<ClientConfig> {
@@ -23,24 +23,24 @@ export class AdminService {
                 throw new Error("Invalid algorithm");
         }
 
-        await configRepository.createOrUpdate(config);
+        await configRepository.createOrUpdate(prisma,config);
         return config;
     }
 
     async getConfig(clientKey: string): Promise<ClientConfig | undefined> {
-        return await configRepository.findByClientKey(clientKey);
+        return await configRepository.findByClientKey(prisma,clientKey);
     }
 
     async getAllConfigs(): Promise<ClientConfig[]> {
-        return await configRepository.findAll();
+        return await configRepository.findAll(prisma);
     }
 
     async deleteConfig(clientKey: string): Promise<void> {
-        await configRepository.delete(clientKey);
+        await configRepository.delete(prisma,clientKey);
     }
 
     async deleteAllConfigs(): Promise<void> {
-        await configRepository.deleteAll();
+        await configRepository.deleteAll(prisma);
     }
 }
 

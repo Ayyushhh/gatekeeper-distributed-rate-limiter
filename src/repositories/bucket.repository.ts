@@ -1,9 +1,9 @@
-import { prisma } from "../lib/prisma";
+import { DatabaseClient } from "../lib/database";
 import { BucketState } from "../algorithms/token-bucket";
 
 export class BucketRepository {
-  async findByClientKey(clientKey: string): Promise<BucketState | null> {
-    const bucket = await prisma.bucketState.findUnique({
+  async findByClientKey(db: DatabaseClient, clientKey: string): Promise<BucketState | null> {
+    const bucket = await db.bucketState.findUnique({
       where: {
         clientKey,
       },
@@ -19,8 +19,32 @@ export class BucketRepository {
     };
   }
 
-  async save(clientKey: string, state: BucketState): Promise<void> {
-    await prisma.bucketState.upsert({
+  async findByClientKeyForUpdate(
+    db: DatabaseClient,
+    clientKey: string,
+  ): Promise<BucketState | null> {
+    const rows = await db.$queryRaw<
+      Array<{ tokens: number; lastRefillAt: bigint }>
+    >`
+      SELECT "tokens", "lastRefillAt"
+      FROM "BucketState"
+      WHERE "clientKey" = ${clientKey}
+      FOR UPDATE
+    `;
+
+    if (rows.length === 0) {
+      return null;
+    }
+
+    const bucket = rows[0];
+    return {
+      tokens: bucket.tokens,
+      lastRefillAt: Number(bucket.lastRefillAt),
+    };
+  }
+
+  async save(db: DatabaseClient, clientKey: string, state: BucketState): Promise<void> {
+    await db.bucketState.upsert({
       where: {
         clientKey,
       },

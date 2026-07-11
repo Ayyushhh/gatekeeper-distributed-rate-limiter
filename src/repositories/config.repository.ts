@@ -1,9 +1,9 @@
-import { prisma } from "../lib/prisma";
+import { DatabaseClient } from "../lib/database";
 import { ClientConfig } from "../models/client-config";
 
 export class ConfigRepository {
-  async createOrUpdate(config: ClientConfig) {
-    return prisma.clientConfig.upsert({
+  async createOrUpdate(db: DatabaseClient, config: ClientConfig) {
+    return db.clientConfig.upsert({
       where: {
         clientKey: config.clientKey,
       },
@@ -25,32 +25,32 @@ export class ConfigRepository {
     });
   }
 
-  async findByClientKey(clientKey: string) {
-    return prisma.clientConfig.findUnique({
+  async findByClientKey(db: DatabaseClient, clientKey: string) {
+    return db.clientConfig.findUnique({
       where: {
         clientKey,
       },
     });
   }
 
-  async findAll() {
-    return prisma.clientConfig.findMany({
+  async findAll(db: DatabaseClient) {
+    return db.clientConfig.findMany({
       orderBy: {
         clientKey: "asc",
       },
     });
   }
 
-  async delete(clientKey: string) {
-    return prisma.clientConfig.delete({
+  async delete(db: DatabaseClient, clientKey: string) {
+    return db.clientConfig.delete({
       where: {
         clientKey,
       },
     });
   }
 
-  async deleteAll() {
-    return prisma.clientConfig.deleteMany();
+  async deleteAll(db: DatabaseClient) {
+    return db.clientConfig.deleteMany();
   }
 }
 
