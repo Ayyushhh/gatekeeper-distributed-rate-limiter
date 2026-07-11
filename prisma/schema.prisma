@@ -26,7 +26,8 @@ model ClientConfig {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  bucket BucketState?
+  bucket        BucketState?
+  slidingWindow SlidingWindowState?
 }
 
 model BucketState {
@@ -36,6 +37,14 @@ model BucketState {
   lastRefillAt BigInt
 
   updatedAt DateTime @updatedAt
+
+  client ClientConfig @relation(fields: [clientKey], references: [clientKey], onDelete: Cascade)
+}
+
+model SlidingWindowState {
+  clientKey  String   @id
+  timestamps Json
+  updatedAt  DateTime @updatedAt
 
   client ClientConfig @relation(fields: [clientKey], references: [clientKey], onDelete: Cascade)
 }

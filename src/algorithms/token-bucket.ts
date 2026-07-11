@@ -1,4 +1,4 @@
-export interface BucketState {
+export interface TokenBucketState {
     tokens: number;
     lastRefillAt: number;
 }
@@ -12,12 +12,12 @@ export interface BucketResult {
     allowed: boolean;
     remaining: number;
     resetAt: number;
-    state: BucketState;
+    state: TokenBucketState;
 }
 
 export function evaluateTokenBucket(
     config: BucketConfig,
-    state: BucketState,
+    state: TokenBucketState,
     now: number = Date.now(),
 ): BucketResult {
     const elapsed = (now - state.lastRefillAt) / 1000;

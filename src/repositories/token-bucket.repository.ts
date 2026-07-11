@@ -1,8 +1,11 @@
 import { DatabaseClient } from "../lib/database";
-import { BucketState } from "../algorithms/token-bucket";
+import { TokenBucketState } from "../algorithms/token-bucket";
 
-export class BucketRepository {
-  async findByClientKey(db: DatabaseClient, clientKey: string): Promise<BucketState | null> {
+export class TokenBucketRepository {
+  async findByClientKey(
+    db: DatabaseClient,
+    clientKey: string,
+  ): Promise<TokenBucketState | null> {
     const bucket = await db.bucketState.findUnique({
       where: {
         clientKey,
@@ -22,7 +25,7 @@ export class BucketRepository {
   async findByClientKeyForUpdate(
     db: DatabaseClient,
     clientKey: string,
-  ): Promise<BucketState | null> {
+  ): Promise<TokenBucketState | null> {
     const rows = await db.$queryRaw<
       Array<{ tokens: number; lastRefillAt: bigint }>
     >`
@@ -43,7 +46,11 @@ export class BucketRepository {
     };
   }
 
-  async save(db: DatabaseClient, clientKey: string, state: BucketState): Promise<void> {
+  async save(
+    db: DatabaseClient,
+    clientKey: string,
+    state: TokenBucketState,
+  ): Promise<void> {
     await db.bucketState.upsert({
       where: {
         clientKey,
@@ -61,4 +68,4 @@ export class BucketRepository {
   }
 }
 
-export const bucketRepository = new BucketRepository();
+export const tokenBucketRepository = new TokenBucketRepository();
