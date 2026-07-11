@@ -1,25 +1,27 @@
-import { BucketConfig, evaluteTokenBucket } from "../algorithms/token-bucket";
-import { bucketStore } from "../storage/bucket-store";
-
-const config: BucketConfig = {
- capacity: 5,
- refillRate: 1,
-};
+import {  evaluteTokenBucket } from "../algorithms/token-bucket";
+import { bucketRepository } from "../repositories/bucket.repository";
+import { configRepository } from "../repositories/config.repository";
 
 export class RateLimitService {
-    check(clientKey: string) {
-        let bucket = bucketStore.get(clientKey);
+    async check(clientKey: string) {
+        const config = await configRepository.findByClientKey(clientKey);
+
+        if (!config) {
+            throw new Error("Client configuration not found.");
+        }
+
+        let bucket = await bucketRepository.findByClientKey(clientKey);
 
         if(!bucket){
             bucket = {
-                tokens: config.capacity,
+                tokens: config.capacity!,
                 lastRefillAt: Date.now(),
             };
         }
 
         const result = evaluteTokenBucket(config,  bucket);
 
-        bucketStore.set(clientKey, result.state);
+        await bucketRepository.save(clientKey, result.state);
 
         return result;
     }

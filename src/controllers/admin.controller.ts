@@ -3,7 +3,7 @@ import { adminService } from "../services/admin.service";
 
 export const createOrUpdateConfig = async (req: Request, res: Response) => {
     try{
-        const config = adminService.createConfigorUpdateConfig(req.body);
+        const config = await adminService.createConfigorUpdateConfig(req.body);
 
         return res.status(201).json({ 
             message: "Config created or updated successfully", 
@@ -18,7 +18,7 @@ export const createOrUpdateConfig = async (req: Request, res: Response) => {
 
 export const getAllConfigs = async (req: Request, res: Response) => {
     try{
-        const configs = adminService.getAllConfigs();
+        const configs = await adminService.getAllConfigs();
         return res.status(200).json({
             message: "Configs fetched successfully",
             configs
@@ -32,7 +32,7 @@ export const getAllConfigs = async (req: Request, res: Response) => {
 
 export const getConfig = async (req: Request, res: Response) => {
     try{
-        const config = adminService.getConfig(req.params.clientKey as string);
+        const config = await adminService.getConfig(req.params.clientKey as string);
         return res.status(200).json({
             message: "Config fetched successfully",
             config
@@ -46,7 +46,7 @@ export const getConfig = async (req: Request, res: Response) => {
 
 export const deleteConfig = async (req: Request, res: Response) => {
     try{
-        adminService.deleteConfig(req.params.clientKey as string);
+        await adminService.deleteConfig(req.params.clientKey as string);
         return res.status(200).json({
             message: "Config deleted successfully",
         });
@@ -59,7 +59,7 @@ export const deleteConfig = async (req: Request, res: Response) => {
 
 export const deleteAllConfigs = async (req: Request, res: Response) => {
     try{
-        adminService.deleteAllConfigs();
+        await adminService.deleteAllConfigs();
         return res.status(200).json({
             message: "All configs deleted successfully",
         });

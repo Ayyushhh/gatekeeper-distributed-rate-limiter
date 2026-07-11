@@ -1,8 +1,9 @@
 import { ClientConfig, RateLimitAlgorithm } from "../models/client-config";
+import { configRepository } from "../repositories/config.repository";
 import { configStore } from "../storage/config-store";
 
 export class AdminService {
-    createConfigorUpdateConfig(config: ClientConfig): ClientConfig {
+    async createConfigorUpdateConfig(config: ClientConfig): Promise<ClientConfig> {
         if(!config.clientKey.trim()) {
             throw new Error("Client key is required");
         }
@@ -22,24 +23,24 @@ export class AdminService {
                 throw new Error("Invalid algorithm");
         }
 
-        configStore.set(config);
+        await configRepository.createOrUpdate(config);
         return config;
     }
 
-    getConfig(clientKey: string): ClientConfig | undefined {
-        return configStore.get(clientKey);
+    async getConfig(clientKey: string): Promise<ClientConfig | undefined> {
+        return await configRepository.findByClientKey(clientKey);
     }
 
-    getAllConfigs(): ClientConfig[] {
-        return configStore.getAll();
+    async getAllConfigs(): Promise<ClientConfig[]> {
+        return await configRepository.findAll();
     }
 
-    deleteConfig(clientKey: string): void {
-        configStore.delete(clientKey);
+    async deleteConfig(clientKey: string): Promise<void> {
+        await configRepository.delete(clientKey);
     }
 
-    deleteAllConfigs(): void {
-        configStore.deleteAll();
+    async deleteAllConfigs(): Promise<void> {
+        await configRepository.deleteAll();
     }
 }
 
