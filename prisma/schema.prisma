@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RateLimitAlgorithm {
+  TOKEN_BUCKET
+  SLIDING_WINDOW
+}
+
+model ClientConfig {
+  clientKey String @id
+
+  algorithm RateLimitAlgorithm
+
+  capacity   Int?
+  refillRate Float?
+
+  windowSize  Int?
+  maxRequests Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bucket BucketState?
+}
+
+model BucketState {
+  clientKey String @id
+
+  tokens       Float
+  lastRefillAt BigInt
+
+  updatedAt DateTime @updatedAt
+
+  client ClientConfig @relation(fields: [clientKey], references: [clientKey], onDelete: Cascade)
+}
