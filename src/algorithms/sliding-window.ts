@@ -1,3 +1,5 @@
+import { RateLimitResult } from "../models/rate-limit-result";
+
 export interface SlidingWindowConfig {
     windowSize: number; // milliseconds
     maxRequests: number;
@@ -7,12 +9,7 @@ export interface SlidingWindowState {
     timestamps: number[];
 }
 
-export interface SlidingWindowResult {
-    allowed: boolean;
-    remaining: number;
-    resetAt: number;
-    state: SlidingWindowState;
-}
+export type SlidingWindowResult = RateLimitResult<SlidingWindowState>;
 
 export function evaluateSlidingWindow(
     config: SlidingWindowConfig,
@@ -46,6 +43,7 @@ export function evaluateSlidingWindow(
   
     return {
       allowed,
+      limit: config.maxRequests,
       remaining,
       resetAt,
       state: {

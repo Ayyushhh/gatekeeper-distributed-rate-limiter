@@ -1,3 +1,5 @@
+import { RateLimitResult } from "../models/rate-limit-result";
+
 export interface TokenBucketState {
     tokens: number;
     lastRefillAt: number;
@@ -8,12 +10,7 @@ export interface BucketConfig {
     refillRate: number;
 }
 
-export interface BucketResult {
-    allowed: boolean;
-    remaining: number;
-    resetAt: number;
-    state: TokenBucketState;
-}
+export type BucketResult = RateLimitResult<TokenBucketState>;
 
 export function evaluateTokenBucket(
     config: BucketConfig,
@@ -41,6 +38,7 @@ export function evaluateTokenBucket(
 
     return {
         allowed,
+        limit: config.capacity,
         remaining,
         resetAt,
         state: { 
